@@ -10,7 +10,7 @@ from constants import *
 
 pygame.init()
 screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
-pygame.display.set_caption('TIC TAC TOE AI')
+pygame.display.set_caption('TIC TAC TOE - CPSC 481')
 screen.fill( BG_COLOR )
 
 # --- CLASSES ---
@@ -18,7 +18,22 @@ screen.fill( BG_COLOR )
 class Board:
 
     def __init__(self):
-        self.squares = np.zeros( (ROWS, COLS) )
+        #self.squares = np.zeros( (ROWS, COLS) )
+        arr = np.empty(shape=(ROWS,COLS), dtype='object')
+        arr[0,2] = 0
+
+        arr[1,1] = 0
+        arr[1,2] = 0
+        arr[1,3] = 0
+
+        arr[2,0] = 0
+        arr[2,1] = 0
+        arr[2,2] = 0
+        arr[2,3] = 0
+        arr[2,4] = 0
+        #arr = [[-1,-1,0,-1,-1],[-1,0,0,0,-1],[0,0,0,0,0]] This also works but I don't like using -1 
+        self.squares = arr
+        print(self.squares)
         self.empty_sqrs = self.squares # [squares]
         self.marked_sqrs = 0
 
@@ -57,14 +72,14 @@ class Board:
                 return self.squares[2][0]
             elif (self.squares[2][1] == self.squares[2][2] == self.squares[2][3] != 0):
                 if show:
-                    color = CIRC_COLOR if self.squares[2][0] == 2 else CROSS_COLOR
+                    color = CIRC_COLOR if self.squares[2][1] == 2 else CROSS_COLOR
                     iPos = (200 + 20, 2 * SQSIZE + SQSIZE // 2)
                     fPos = (800 - 20, 2 * SQSIZE + SQSIZE // 2)
                     pygame.draw.line(screen, color, iPos, fPos, LINE_WIDTH)
                 return self.squares[2][0]
             elif (self.squares[2][2] == self.squares[2][3] == self.squares[2][4] != 0):
                 if show:
-                    color = CIRC_COLOR if self.squares[2][0] == 2 else CROSS_COLOR
+                    color = CIRC_COLOR if self.squares[2][2] == 2 else CROSS_COLOR
                     iPos = (400 + 20 , 2 * SQSIZE + SQSIZE // 2)
                     fPos = (WIDTH - 20, 2 * SQSIZE + SQSIZE // 2)
                     pygame.draw.line(screen, color, iPos, fPos, LINE_WIDTH)
@@ -197,7 +212,7 @@ class Game:
         self.board = Board()
         self.ai = AI()
         self.player = 1   #1-cross  #2-circles
-        self.gamemode = 'pvp' # pvp or ai
+        self.gamemode = 'ai' # pvp or ai
         self.running = True
         self.show_lines()
 
@@ -323,5 +338,5 @@ def main():
                 game.running = False
             
         pygame.display.update()
-
+        
 main()
