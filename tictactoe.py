@@ -15,8 +15,12 @@ screen.fill( BG_COLOR )
 
 # --- CLASSES ---
 
+
 class Board:
 
+    # This is where the board gets initialized/created. Because its a tic tac toe, we use 
+    # a 2D array and set the places where we can play/mark to 0, Everywhere else
+    # on the board where a player should not make a move is left EMPTY
     def __init__(self):
         #self.squares = np.zeros( (ROWS, COLS) )
         arr = np.empty(shape=(ROWS,COLS), dtype='object')
@@ -31,13 +35,13 @@ class Board:
         arr[2,2] = 0
         arr[2,3] = 0
         arr[2,4] = 0
-        #arr = [[-1,-1,0,-1,-1],[-1,0,0,0,-1],[0,0,0,0,0]] This also works but I don't like using -1 
         self.squares = arr
         print(self.squares)
         self.empty_sqrs = self.squares # [squares]
         self.marked_sqrs = 0
 
     def final_state(self, show=False):
+        # Returns 0 if there is no winner so keeps the board empty and the game going
         '''
             @return 0 if there is no win yet
             @return 1 if player 1 wins
@@ -45,16 +49,22 @@ class Board:
         '''
 
         # vertical wins
+        # This for-loop checks vertical wins which is just at the middle of the pyramid
+        # line 53 checks specifically any column and rows 0 1 2
+        # The second if "show" happens when a player wins with a vertical win. This just 
+        # determines the color of the line that crosses the winning move
         for col in range(COLS):
             if self.squares[0][col] == self.squares[1][col] == self.squares[2][col] != 0:
-                if show:
-                    color = CIRC_COLOR if self.squares[0][col] == 2 else CROSS_COLOR
-                    iPos = (col * SQSIZE + SQSIZE // 2, 20)
-                    fPos = (col * SQSIZE + SQSIZE // 2, HEIGHT - 20)
-                    pygame.draw.line(screen, color, iPos, fPos, LINE_WIDTH)
-                return self.squares[0][col]
+                if show: 
+                    color = CIRC_COLOR if self.squares[0][col] == 2 else CROSS_COLOR # Choose color of the line based on the winner
+                    iPos = (col * SQSIZE + SQSIZE // 2, 20) # This sets the starting point of the cross line
+                    fPos = (col * SQSIZE + SQSIZE // 2, HEIGHT - 20) # This sets the ending point of the cross line
+                    pygame.draw.line(screen, color, iPos, fPos, LINE_WIDTH) # Draws the line using initial and final position
+                return self.squares[0][col] 
 
         # horizontal wins
+        # Because there are more columns wins and the 3rd row has multiple possible sets to win
+        # each if condition is for each possibile win options. The show is similar to verticle win
         for row in range(ROWS):
             if self.squares[1][1] == self.squares[1][2] == self.squares[1][3] != 0:
                 if show:
@@ -86,6 +96,7 @@ class Board:
                 return self.squares[2][0]
 
         # desc diagonal
+        # Checks if the diagonal wins from the top of the pyramid to the bottom RIGHT
         if self.squares[0][2] == self.squares[1][3] == self.squares[2][4] != 0:
             if show:
                 color = CIRC_COLOR if self.squares[1][3] == 2 else CROSS_COLOR
@@ -95,6 +106,7 @@ class Board:
             return self.squares[1][1]
 
         # asc diagonal
+        # Checks if the diagonal wins from the top of the pyramid to the bottom LEFT
         if self.squares[2][0] == self.squares[1][1] == self.squares[0][2] != 0:
             if show:
                 color = CIRC_COLOR if self.squares[1][1] == 2 else CROSS_COLOR
@@ -106,13 +118,20 @@ class Board:
         # no win yet
         return 0
 
+    # Everytime a player makes a move, it replaces the 0 on the board with the player 1 or 
+    # player 2 value so replaces 0 with 1 or 2.
+    # there is only 9 spaces so this is a way to verify if all possible moves are made
     def mark_sqr(self, row, col, player):
         self.squares[row][col] = player
         self.marked_sqrs += 1
 
+    # Check if the specific square is empty, So it will return true if the square
+    # is empty.
     def empty_sqr(self, row, col):
         return self.squares[row][col] == 0
 
+    # Returns all the empty squares in the map. This is used to see where the next moves
+    # can be marked. Its a way of updating the board
     def get_empty_sqrs(self):
         empty_sqrs = []
         for row in range(ROWS):
@@ -122,9 +141,11 @@ class Board:
         
         return empty_sqrs
 
+    # Checks if the boardgame is full since there are only 9 spaces to populate
     def isfull(self):
         return self.marked_sqrs == 9
 
+    # Checks if the board is empty, not just a specific square
     def isempty(self):
         return self.marked_sqrs == 0
 
@@ -208,10 +229,11 @@ class AI:
 
 class Game:
 
+    # Everything gets initialized here
     def __init__(self):
-        self.board = Board()
-        self.ai = AI()
-        self.player = 1   #1-cross  #2-circles
+        self.board = Board() # Create board
+        self.ai = AI()  # Setup AI
+        self.player = 1   #1-cross  #2-circles also this is the value of the player when marking
         self.gamemode = 'ai' # pvp or ai
         self.running = True
         self.show_lines()
@@ -219,21 +241,25 @@ class Game:
     # --- DRAW METHODS ---
 
     def show_lines(self):
-        # bg
+        # back ground color
         screen.fill( BG_COLOR )
 
         # vertical
+        # This is where we can draw the line for the game. I created a 4 verticle lines for rows
         pygame.draw.line(screen, LINE_COLOR, (200, 200), (200, HEIGHT), LINE_WIDTH)
         pygame.draw.line(screen, LINE_COLOR, (400, 0), (400, HEIGHT), LINE_WIDTH)
         pygame.draw.line(screen, LINE_COLOR, (600, 0), (600, HEIGHT), LINE_WIDTH)
         pygame.draw.line(screen, LINE_COLOR, (800, 200), (800, HEIGHT), LINE_WIDTH)
 
         # horizontal
+        # 2 Horizontal lines for column making it a 3X5
         pygame.draw.line(screen, LINE_COLOR, (200, SQSIZE), (800, SQSIZE), LINE_WIDTH)
         pygame.draw.line(screen, LINE_COLOR, (0, HEIGHT - SQSIZE), (WIDTH, HEIGHT - SQSIZE), LINE_WIDTH)
         
 
     def draw_fig(self, row, col):
+
+        # Draw two lines to make X. These attributes are referenced on constrant.py
         if self.player == 1:
             # draw cross
             # desc line
@@ -245,6 +271,7 @@ class Game:
             end_asc = (col * SQSIZE + SQSIZE - OFFSET, row * SQSIZE + OFFSET)
             pygame.draw.line(screen, CROSS_COLOR, start_asc, end_asc, CROSS_WIDTH)
         
+        # Draw circle
         elif self.player == 2:
             # draw circle
             center = (col * SQSIZE + SQSIZE // 2, row * SQSIZE + SQSIZE // 2)
@@ -311,12 +338,18 @@ def main():
                     ai.level = 1
 
             # click event
+            # This converts pixels to rows and colums. In a tradition tictactoe if you clicked 
+            # the first top left square, it will display (0,300) where 300 is the length of the
+            # square but this allows it to set the click to (0,0) which converted pixel
+            # row and col 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 row = pos[1] // SQSIZE
                 col = pos[0] // SQSIZE
                 
                 # human mark sqr
+                # This calls empty squre to check if its empty or not and make a move based
+                # on the return value. This is referencing line 127
                 if board.empty_sqr(row, col) and game.running:
                     game.make_move(row, col)
 
